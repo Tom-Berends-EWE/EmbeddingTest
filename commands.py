@@ -23,8 +23,7 @@ remove_cache_option = option(
 run_psql_instance_option = option(
     '--run-psql-instance',
     '-r',
-    is_flag=True,
-    default=False
+    is_flag=True
 )
 
 
@@ -40,11 +39,11 @@ def cli():
     is_flag=True,
 )
 @option(
-    '--exclude',
-    '-e',
+    '--exclude/--include',
+    '-e/-i',
     'exclude_selected',
     cls=Mutex,
-    is_flag=True,
+    default=False,
     not_required_if=['discard_all']
 )
 @option(
@@ -70,7 +69,9 @@ def _discard_cache_command(discard_all: bool, exclude_selected: bool, embeddings
 )
 @remove_cache_option
 @run_psql_instance_option
-def _embed_documents_command(docs_dirs: tuple[str], embeddings_models: tuple[str], discard_cached_embeddings: bool,
+def _embed_documents_command(docs_dirs: tuple[str],
+                             embeddings_models: tuple[str],
+                             discard_cached_embeddings: bool,
                              run_psql_instance: bool) -> None:
     embed_documents(docs_dirs, embeddings_models, discard_cached_embeddings, run_psql_instance)
 
@@ -96,9 +97,9 @@ def _embed_documents_command(docs_dirs: tuple[str], embeddings_models: tuple[str
 @remove_cache_option
 @run_psql_instance_option
 @option(
-    '--verbose',
+    '--verbose/--quiet',
     '-v',
-    is_flag=True,
+    default=False
 )
 def _chat_command(docs_dirs: tuple[str],
                   embeddings_model: str,
