@@ -14,10 +14,9 @@ loading_directory_option = option(
     multiple=True,
     default=('res/docs/', )
 )
-remove_cache_option = option(
-    '--discard-cached-embeddings',
-    '-rmc',
-    is_flag=True,
+overwrite_cache_option = option(
+    '--overwrite-cached-embeddings/--use-cached-embeddings',
+    '-o',
     default=False
 )
 run_psql_instance_option = option(
@@ -67,13 +66,13 @@ def _discard_cache_command(discard_all: bool, exclude_selected: bool, embeddings
     multiple=True,
     default=('AWS', )
 )
-@remove_cache_option
+@overwrite_cache_option
 @run_psql_instance_option
 def _embed_documents_command(docs_dirs: tuple[str],
                              embeddings_models: tuple[str],
-                             discard_cached_embeddings: bool,
+                             overwrite_cached_embeddings: bool,
                              run_psql_instance: bool) -> None:
-    embed_documents(docs_dirs, embeddings_models, discard_cached_embeddings, run_psql_instance)
+    embed_documents(docs_dirs, embeddings_models, overwrite_cached_embeddings, run_psql_instance)
 
 
 @cli.command(name='chat')
@@ -94,7 +93,7 @@ def _embed_documents_command(docs_dirs: tuple[str],
     default=5,
     type=int
 )
-@remove_cache_option
+@overwrite_cache_option
 @run_psql_instance_option
 @option(
     '--verbose/--quiet',
@@ -105,7 +104,7 @@ def _chat_command(docs_dirs: tuple[str],
                   embeddings_model: str,
                   sys_msg_file: str,
                   num_docs: int,
-                  discard_cached_embeddings: bool,
+                  overwrite_cached_embeddings: bool,
                   run_psql_instance: bool,
                   verbose: bool) -> None:
-    chat(docs_dirs, embeddings_model, sys_msg_file, num_docs, discard_cached_embeddings, run_psql_instance, verbose)
+    chat(docs_dirs, embeddings_model, sys_msg_file, num_docs, overwrite_cached_embeddings, run_psql_instance, verbose)

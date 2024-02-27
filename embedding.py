@@ -33,6 +33,7 @@ from more_itertools import flatten
 from tqdm import tqdm
 
 from aws_embeddings import AWSEmbeddings
+from optional_withhold_base_store import OptionalWithholdBaseStore
 from util import create_psql_process
 
 
@@ -124,16 +125,17 @@ def _delete_from_cache_where(__filter: Callable[[str], bool]):
     store.mdelete(filter(__filter, store.yield_keys()))
 
 
-def _create_embeddings(embeddings_model: str, discard_cached_embeddings: bool, namespace: str) -> Embeddings:
+def _create_embeddings(embeddings_model: str, overwrite_cached_embeddings: bool, namespace: str) -> Embeddings:
     underlying_embeddings = _select_embeddings_model(embeddings_model)
 
     store = _get_cache_file_store()
 
-    if discard_cached_embeddings:
-        _delete_from_cache_where(lambda s: s.startswith(namespace))
+    if overwrite_cached_embeddings:
+        store = OptionalWithholdBaseStore.always_withhold(store)
 
     return CacheBackedEmbeddings.from_bytes_store(
-        underlying_embeddings, store,
+        underlying_embeddings,
+        store,
         namespace=namespace
     )
 
@@ -192,12 +194,12 @@ def _get_source_documents(docs_dirs: Iterator[str] | Iterable[str]) -> Iterable[
 def _generate_embeddings(halo: Halo,
                          documents: list[Document],
                          embeddings_models: tuple[str],
-                         discard_cached_embeddings: bool) -> Generator[VectorStore, None, None]:
+                         overwrite_cached_embeddings: bool) -> Generator[VectorStore, None, None]:
     for embeddings_model in embeddings_models:
         halo.text = f'Generating embeddings using model "{embeddings_model}"'
         try:
             embeddings = _create_embeddings(embeddings_model,
-                                            discard_cached_embeddings,
+                                            overwrite_cached_embeddings,
                                             _uuid_str(embeddings_model))
         except ValueError as err:
             halo.warn(str(err))
@@ -208,7 +210,7 @@ def _generate_embeddings(halo: Halo,
 
 def embed_documents(docs_dirs: tuple[str],
                     embeddings_models: tuple[str],
-                    discard_cached_embeddings: bool,
+                    overwrite_cached_embeddings: bool,
                     run_psql_instance: bool) -> list[VectorStore]:
     source_documents: Iterable[str] = _get_source_documents(docs_dirs)
     documents: Iterator[Document] = _load_documents(source_documents)
@@ -219,4 +221,4 @@ def embed_documents(docs_dirs: tuple[str],
         Halo(text='Loading embeddings...', spinner='bouncingBar') as halo,
         create_psql_process() if run_psql_instance else nullcontext(),
     ):
-        return [*_generate_embeddings(halo, split_documents, embeddings_models, discard_cached_embeddings)]
+        return [*_generate_embeddings(halo, split_documents, embeddings_models, overwrite_cached_embeddings)]
