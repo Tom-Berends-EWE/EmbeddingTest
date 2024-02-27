@@ -8,3 +8,6 @@ more_itertools==10.2.0
 python-dotenv==1.0.1
 Requests==2.31.0
 tqdm==4.66.2
+pymupdf==1.23.22
+sentence-transformers==2.4.0
+faiss-cpu==1.7.4
