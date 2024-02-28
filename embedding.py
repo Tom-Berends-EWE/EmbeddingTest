@@ -115,6 +115,18 @@ def _select_embeddings_model(embeddings_model: str) -> Embeddings:
     return embeddings_factory()
 
 
+def _get_model_identifier(embeddings: Embeddings) -> str:
+    def _get_unique_model_name():
+        match embeddings:
+            case HuggingFaceEmbeddings(model_name=model_name):
+                return model_name
+            case AWSEmbeddings(_api_url=api_url):
+                return api_url
+
+    unique_model_name = _get_unique_model_name()
+    return embeddings.__class__.__name__ + (': ' + unique_model_name) if unique_model_name else ''
+
+
 @cache
 def _get_cache_file_store():
     return LocalFileStore('./cache/embeddings/')
@@ -125,13 +137,15 @@ def _delete_from_cache_where(__filter: Callable[[str], bool]):
     store.mdelete(filter(__filter, store.yield_keys()))
 
 
-def _create_embeddings(embeddings_model: str, overwrite_cached_embeddings: bool, namespace: str) -> Embeddings:
+def _create_embeddings(embeddings_model: str, overwrite_cached_embeddings: bool) -> Embeddings:
     underlying_embeddings = _select_embeddings_model(embeddings_model)
 
     store = _get_cache_file_store()
 
     if overwrite_cached_embeddings:
         store = OptionalWithholdBaseStore.always_withhold(store)
+
+    namespace = _uuid_str(_get_model_identifier(underlying_embeddings))
 
     return CacheBackedEmbeddings.from_bytes_store(
         underlying_embeddings,
@@ -198,9 +212,7 @@ def _generate_embeddings(halo: Halo,
     for embeddings_model in embeddings_models:
         halo.text = f'Generating embeddings using model "{embeddings_model}"'
         try:
-            embeddings = _create_embeddings(embeddings_model,
-                                            overwrite_cached_embeddings,
-                                            _uuid_str(embeddings_model))
+            embeddings = _create_embeddings(embeddings_model, overwrite_cached_embeddings)
         except ValueError as err:
             halo.warn(str(err))
             continue
