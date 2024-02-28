@@ -6,6 +6,7 @@ from click import option
 from chat import chat
 from embedding import embed_documents, discard_embeddings_cache
 from mutex_option import Mutex
+from retrieve import retrieve
 
 loading_directory_option = option(
     '--dir',
@@ -13,6 +14,18 @@ loading_directory_option = option(
     'docs_dirs',
     multiple=True,
     default=('res/docs/', )
+)
+single_embeddings_model_option = option(
+    '--embeddings-model',
+    '-m',
+    default='AWS'
+)
+num_returned_docs_option = option(
+    '--returned-docs',
+    '-k',
+    'num_docs',
+    default=5,
+    type=int
 )
 overwrite_cache_option = option(
     '--overwrite-cached-embeddings/--use-cached-embeddings',
@@ -23,6 +36,11 @@ run_psql_instance_option = option(
     '--run-psql-instance',
     '-r',
     is_flag=True
+)
+verbose_option = option(
+    '--verbose/--quiet',
+    '-v',
+    default=False
 )
 
 
@@ -75,31 +93,33 @@ def _embed_documents_command(docs_dirs: tuple[str],
     embed_documents(docs_dirs, embeddings_models, overwrite_cached_embeddings, run_psql_instance)
 
 
+@cli.command(name='retrieve')
+@loading_directory_option
+@single_embeddings_model_option
+@num_returned_docs_option
+@overwrite_cache_option
+@run_psql_instance_option
+@verbose_option
+def _retrieve_command(docs_dirs: tuple[str],
+                      embeddings_model: str,
+                      num_docs: int,
+                      overwrite_cached_embeddings: bool,
+                      run_psql_instance: bool,
+                      verbose: bool) -> None:
+    retrieve(docs_dirs, embeddings_model, num_docs, overwrite_cached_embeddings, run_psql_instance, verbose)
+
+
 @cli.command(name='chat')
 @loading_directory_option
-@option(
-    '--embeddings-model',
-    '-m',
-    default='AWS'
-)
+@single_embeddings_model_option
 @option(
     '--prompt-template-dir',
     '-t'
 )
-@option(
-    '--returned-docs',
-    '-k',
-    'num_docs',
-    default=5,
-    type=int
-)
+@num_returned_docs_option
 @overwrite_cache_option
 @run_psql_instance_option
-@option(
-    '--verbose/--quiet',
-    '-v',
-    default=False
-)
+@verbose_option
 def _chat_command(docs_dirs: tuple[str],
                   embeddings_model: str,
                   prompt_template_dir: str,
