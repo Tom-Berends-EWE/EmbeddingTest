@@ -215,6 +215,7 @@ def _generate_embeddings(halo: Halo,
             embeddings = _create_embeddings(embeddings_model, overwrite_cached_embeddings)
         except ValueError as err:
             halo.warn(str(err))
+            halo.start()
             continue
 
         yield _compute_vectorstore(documents, embeddings)
