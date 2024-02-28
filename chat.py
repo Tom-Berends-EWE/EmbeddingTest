@@ -38,7 +38,7 @@ def _create_conversational_chain(vectorstore: VectorStore,
     human_message_prompt = HumanMessagePromptTemplate.from_template(template=_HUMAN_MESSAGE_TEMPLATE)
     question_answering_prompt = ChatPromptTemplate.from_messages([system_message_prompt, human_message_prompt])
     condense_question_prompt = PromptTemplate.from_template(
-        _load_prompt_template('res/condense-question-prompt-template.txt')
+        _load_prompt_template('res/templates/condense-question-prompt-template.txt')
     )
 
     memory: ConversationBufferMemory = ConversationBufferMemory(

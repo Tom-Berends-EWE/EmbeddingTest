@@ -84,7 +84,7 @@ def _embed_documents_command(docs_dirs: tuple[str],
 )
 @option(
     '--sys-msg-file',
-    default='res/system-message-prompt-template.txt'
+    default='res/templates/system-message-prompt-template.txt'
 )
 @option(
     '--returned-docs',
