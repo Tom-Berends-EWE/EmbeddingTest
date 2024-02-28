@@ -83,8 +83,8 @@ def _embed_documents_command(docs_dirs: tuple[str],
     default='AWS'
 )
 @option(
-    '--sys-msg-file',
-    default='res/templates/system-message-prompt-template.txt'
+    '--prompt-template-dir',
+    '-t'
 )
 @option(
     '--returned-docs',
@@ -102,9 +102,9 @@ def _embed_documents_command(docs_dirs: tuple[str],
 )
 def _chat_command(docs_dirs: tuple[str],
                   embeddings_model: str,
-                  sys_msg_file: str,
+                  prompt_template_dir: str,
                   num_docs: int,
                   overwrite_cached_embeddings: bool,
                   run_psql_instance: bool,
                   verbose: bool) -> None:
-    chat(docs_dirs, embeddings_model, sys_msg_file, num_docs, overwrite_cached_embeddings, run_psql_instance, verbose)
+    chat(docs_dirs, embeddings_model, prompt_template_dir, num_docs, overwrite_cached_embeddings, run_psql_instance, verbose)
