@@ -54,7 +54,7 @@ def _get_document_loader(file_ext: str) -> Type[BaseLoader]:
         case '.csv':
             return CSVLoader
         case _:
-            raise ValueError(f'Unsupported file extension: "{file_ext}"')
+            pass
 
 
 def _load_document(path: str) -> list[Document]:
