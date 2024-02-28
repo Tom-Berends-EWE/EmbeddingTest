@@ -1,0 +1,15 @@
+Dir ist folgender Chatverlauf mit einem Kunden gegeben:
+###
+{chat_history}
+###
+
+Formuliere die folgende Eingabe des Kunden mithilfe des Kontexts des vorangegangenem Chatverlauf, zu einer alleinstehenden Formulierung um.
+Beachte dabei:
+ - sollte es sich bei der Eingabe nicht um eine Frage handeln, dann gebe die Eingabe als alleinstehende Formulierung unverändert weiter.
+
+Eingabe:
+###
+{question}
+###
+
+Die alleinstehende Formulierung:
