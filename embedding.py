@@ -208,12 +208,16 @@ def _get_source_documents(docs_dirs: Iterator[str] | Iterable[str]) -> Iterable[
 def _generate_embeddings(halo: Halo,
                          documents: list[Document],
                          embeddings_models: tuple[str],
-                         overwrite_cached_embeddings: bool) -> Generator[VectorStore, None, None]:
+                         overwrite_cached_embeddings: bool,
+                         exit_if_unknown_model: bool) -> Generator[VectorStore, None, None]:
     for embeddings_model in embeddings_models:
         halo.text = f'Generating embeddings using model "{embeddings_model}"'
         try:
             embeddings = _create_embeddings(embeddings_model, overwrite_cached_embeddings)
         except ValueError as err:
+            if exit_if_unknown_model:
+                raise err
+
             halo.warn(str(err))
             halo.start()
             continue
@@ -224,7 +228,8 @@ def _generate_embeddings(halo: Halo,
 def embed_documents(docs_dirs: tuple[str],
                     embeddings_models: tuple[str],
                     overwrite_cached_embeddings: bool,
-                    run_psql_instance: bool) -> list[VectorStore]:
+                    run_psql_instance: bool,
+                    exit_if_unknown_model: bool = False) -> list[VectorStore]:
     source_documents: Iterable[str] = _get_source_documents(docs_dirs)
     documents: Iterator[Document] = _load_documents(source_documents)
     split_documents: list[Document] = _split_documents(documents)
@@ -234,4 +239,11 @@ def embed_documents(docs_dirs: tuple[str],
         Halo(text='Loading embeddings...', spinner='bouncingBar') as halo,
         create_psql_process() if run_psql_instance else nullcontext(),
     ):
-        return [*_generate_embeddings(halo, split_documents, embeddings_models, overwrite_cached_embeddings)]
+        return [
+                *_generate_embeddings(
+                    halo,
+                    split_documents,
+                    embeddings_models,
+                    overwrite_cached_embeddings,
+                    exit_if_unknown_model
+                )]
