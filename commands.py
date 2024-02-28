@@ -37,6 +37,11 @@ run_psql_instance_option = option(
     '-r',
     is_flag=True
 )
+verbose_option = option(
+    '--verbose/--quiet',
+    '-v',
+    default=False
+)
 
 
 @click.group()
@@ -94,12 +99,14 @@ def _embed_documents_command(docs_dirs: tuple[str],
 @num_returned_docs_option
 @overwrite_cache_option
 @run_psql_instance_option
+@verbose_option
 def _retrieve_command(docs_dirs: tuple[str],
                       embeddings_model: str,
                       num_docs: int,
                       overwrite_cached_embeddings: bool,
-                      run_psql_instance: bool) -> None:
-    retrieve(docs_dirs, embeddings_model, num_docs, overwrite_cached_embeddings, run_psql_instance)
+                      run_psql_instance: bool,
+                      verbose: bool) -> None:
+    retrieve(docs_dirs, embeddings_model, num_docs, overwrite_cached_embeddings, run_psql_instance, verbose)
 
 
 @cli.command(name='chat')
@@ -112,11 +119,7 @@ def _retrieve_command(docs_dirs: tuple[str],
 @num_returned_docs_option
 @overwrite_cache_option
 @run_psql_instance_option
-@option(
-    '--verbose/--quiet',
-    '-v',
-    default=False
-)
+@verbose_option
 def _chat_command(docs_dirs: tuple[str],
                   embeddings_model: str,
                   sys_msg_file: str,
