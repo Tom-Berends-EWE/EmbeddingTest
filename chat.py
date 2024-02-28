@@ -58,11 +58,13 @@ def _load_conversational_chain(docs_dirs: tuple[str],
                                overwrite_cached_embeddings: bool,
                                run_psql_instance: bool,
                                verbose: bool) -> BaseConversationalRetrievalChain:
-    vectorstore: VectorStore = embed_documents(docs_dirs,
-                                               (embeddings_model,),
-                                               overwrite_cached_embeddings,
-                                               run_psql_instance,
-                                               exit_if_unknown_model=True)[0]
+    vectorstore: VectorStore = embed_documents(
+        docs_dirs,
+        (embeddings_model,),
+        overwrite_cached_embeddings,
+        run_psql_instance,
+        exit_if_unknown_model=True
+    )[0]
 
     model: BaseChatModel = _create_model()
     system_message_prompt_template = _load_system_message_prompt_template(system_message_prompt_template_path)
