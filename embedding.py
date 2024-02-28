@@ -78,7 +78,7 @@ def _split_documents(documents: Iterator[Document]) -> list[Document]:
 
 def _postprocess_split_documents(documents: list[Document]) -> None:
     for doc in documents:
-        doc.page_content = re.sub(r'[^\x20-\x7E]', '', doc.page_content)
+        doc.page_content = re.sub(r'[^\x20-\x7EÄÖÜäöüß]', '', doc.page_content)
 
 
 def _create_hugging_face_embeddings() -> HuggingFaceEmbeddings:
